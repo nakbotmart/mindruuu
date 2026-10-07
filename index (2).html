@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="UniMind Pro: Academic Mental Health &amp; Performance Analytics Dashboard">
+  <meta name="theme-color" content="#0D9488">
+  <title>UniMind Pro | Academic Mental Health &amp; Performance Analytics</title>
+
+  <!-- Google Fonts: Prompt -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome v6 (icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+
+  <!-- External stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Chart.js v4 (CDN) must load before app.js; both use defer so order is kept -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <!-- External application script -->
+  <script src="app.js" defer></script>
+</head>
+
+<body>
+  <noscript><p class="noscript-note">หน้านี้ต้องเปิดใช้งาน JavaScript เพื่อประมวลผลและแสดงกราฟ</p></noscript>
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="site-header" id="siteHeader">
+    <div class="container header-inner">
+      <a class="logo" href="#" aria-label="UniMind Pro">
+        <span class="logo-icon" aria-hidden="true"><i class="fa-solid fa-brain"></i></span>
+        <span class="logo-text">UniMind <span class="logo-pro">Pro</span></span>
+      </a>
+      <p class="site-tagline">Academic Mental Health &amp; Performance Analytics Dashboard</p>
+      <span class="badge badge-active" id="engineBadge" role="status">
+        <span class="status-dot" aria-hidden="true"></span>
+        AI Health Engine Active
+      </span>
+    </div>
+  </header>
+
+  <!-- ===================== MAIN: 2-COLUMN GRID ===================== -->
+  <main class="container layout-grid" id="mainLayout">
+
+    <!-- ============ LEFT COLUMN: FORM ============ -->
+    <section class="panel panel-form" id="formSection" aria-labelledby="formTitle">
+      <h2 class="panel-title" id="formTitle"><i class="fa-solid fa-clipboard-list" aria-hidden="true"></i> แบบประเมินสภาวะนักศึกษา</h2>
+
+      <form class="assessment-form" id="assessmentForm">
+
+        <!-- Basic info -->
+        <fieldset class="form-block" id="basicInfoBlock">
+          <legend class="block-title">ข้อมูลพื้นฐาน</legend>
+
+          <div class="form-group" id="aliasGroup">
+            <label class="form-label" for="alias">นามแฝง (Alias) <span class="form-optional">(ไม่บังคับ)</span></label>
+            <input class="form-input" type="text" id="alias" name="alias" maxlength="30" autocomplete="off" placeholder="เช่น Bean, N1">
+          </div>
+
+          <div class="form-group" id="moodGroup">
+            <label class="form-label" for="moodSelect">อารมณ์วันนี้ (มาตราส่วน 1-5)</label>
+            <select class="form-input form-select" id="moodSelect" name="mood" required>
+              <option value="5">5 - สดใสมาก</option>
+              <option value="4">4 - ค่อนข้างดี</option>
+              <option value="3" selected>3 - ปกติ</option>
+              <option value="2">2 - เหนื่อยล้า / เครียด</option>
+              <option value="1">1 - ท้อแท้มาก</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group" id="taskGroup">
+              <label class="form-label" for="taskCount">จำนวนงานค้าง / วิชาที่ต้องสอบ</label>
+              <input class="form-input" type="number" id="taskCount" name="taskCount" min="0" max="20" value="3" inputmode="numeric" required>
+            </div>
+            <div class="form-group" id="sleepGroup">
+              <label class="form-label" for="sleepHours">ชั่วโมงการนอนเมื่อคืน</label>
+              <input class="form-input" type="number" id="sleepHours" name="sleepHours" min="0" max="24" step="0.5" value="6" inputmode="decimal" required>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- ST-5 questionnaire -->
+        <fieldset class="form-block" id="st5Block">
+          <legend class="block-title">แบบสอบถามความเครียด 5 ข้อ (ST-5)</legend>
+          <p class="block-help">ในช่วง 2 สัปดาห์ที่ผ่านมา คุณมีอาการต่อไปนี้บ่อยเพียงใด (0 = ไม่เลย ถึง 3 = ตลอดเวลา)</p>
+
+          <fieldset class="st5-question" id="st5Q1" data-dimension="sleep">
+            <legend class="st5-legend"><span class="st5-number">Q1</span> มีปัญหาเกี่ยวกับการนอน นอนไม่หลับหรือนอนมากเกินไป?</legend>
+            <div class="likert">
+              <label class="likert-option">
+                <input class="likert-input" type="radio" name="st5q1" id="st5q1v0" value="0" required>
+                <span class="likert-chip"><span class="likert-value">0</span> ไม่เลย</span>
+              </label>
+              <label class="likert-option">
+                <input class="likert-input" type="radio" name="st5q1" id="st5q1v1" value="1" required>
+                <span class="likert-chip"><span class="likert-value">1</span> บางครั้ง</span>
+              </label>
+              <label class="likert-option">
+                <input class="likert-input" type="radio" name="st5q1" id="st5q1v2" value="2" required>
+                <span class="likert-chip"><span class="likert-value">2</span> บ่อยครั้ง</span>
+              </label>
+              <label class="likert-option">
+                <input class="likert-input" type="radio" name="st5q1" id="st5q1v3" value="3" required>
+                <span class="likert-chip"><span class="likert-value">3</span> ตลอดเวลา</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="st5-question" id="st5Q2" data-dimension="focus">
+            <legend class="st5-legend"><span class="st5-number">Q2</span> รู้สึกสมาธิสั้น หรือไม่มีสมาธิในการเรียน/อ่านหนังสือ?</legend>
+            <div class="likert">
+              <label class="likert-option">
+                <input class="likert-input" type="radio" name="st5q2" id="st5q2v0" value="0" required>
+                <span class="likert-chip"><span class="likert-value">0</span> ไม่เลย</span>
+              </label>
+              <label class="likert-option">
+                <input class="likert-input" type="radio" name="st5q2" id="st5q2v1" value="1" required>
+                <span class="likert-chip"><span class="likert-value">1</span> บางครั้ง</span>
+              </label>
+              <label class="likert-option">
+                <input class="likert-input" type="radio" name="st5q2" id="st5q2v2" value="2" required>
+                <span class="likert-chip"><span class="likert-value">2</span> บ่อยครั้ง</span>
+              </label>
+              <label class="likert-option">
+                <input class="likert-input" type="radio" name="st5q2" id="st5q2v3" value="3" required>
+                <span class="likert-chip"><span class="likert-value">3</span> ตลอดเวลา</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="st5-question" id="st5Q3" data-dimension="mood">
+            <legend class="st5-legend"><span class="st5-number">Q3</span> รู้สึกหงุดหงิด กังวลใจ หรือกระสับกระส่ายง่ายกว่าปกติ?</legend>
+            <div class="likert">
+              <label class="likert-option">
+                <input class="likert-input" type="radio" name="st5q3" id="st5q3v0" value="0" required>
+                <span class="likert-chip"><span class="likert-value">0</span> ไม่เลย</span>
+              </label>
+              <label class="likert-option">
+                <input class="likert-input" type="radio" name="st5q3" id="st5q3v1" value="1" required>
+                <span class="likert-chip"><span class="likert-value">1</span> บางครั้ง</span>
+              </label>
+              <label class="likert-option">
+                <input class="likert-input" type="radio" name="st5q3" id="st5q3v2" value="2" required>
+                <span class="likert-chip"><span class="likert-value">2</span> บ่อยครั้ง</span>
+              </label>
+              <label class="likert-option">
+                <input class="likert-input" type="radio" name="st5q3" id="st5q3v3" value="3" required>
+                <span class="likert-chip"><span class="likert-value">3</span> ตลอดเวลา</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="st5-question" id="st5Q4" data-dimension="energy">
+            <legend class="st5-legend"><span class="st5-number">Q4</span> รู้สึกหมดพลัง ไม่อยากทำกิจกรรมที่เคยชอบ หรือท้อแท้กับการเรียน?</legend>
+            <div class="likert">
+              <label class="likert-option">
+                <input class="likert-input" type="radio" name="st5q4" id="st5q4v0" value="0" required>
+                <span class="likert-chip"><span class="likert-value">0</span> ไม่เลย</span>
+              </label>
+              <label class="likert-option">
+                <input class="likert-input" type="radio" name="st5q4" id="st5q4v1" value="1" required>
+                <span class="likert-chip"><span class="likert-value">1</span> บางครั้ง</span>
+              </label>
+              <label class="likert-option">
+                <input class="likert-input" type="radio" name="st5q4" id="st5q4v2" value="2" required>
+                <span class="likert-chip"><span class="likert-value">2</span> บ่อยครั้ง</span>
+              </label>
+              <label class="likert-option">
+                <input class="likert-input" type="radio" name="st5q4" id="st5q4v3" value="3" required>
+                <span class="likert-chip"><span class="likert-value">3</span> ตลอดเวลา</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="st5-question" id="st5Q5" data-dimension="coping">
+            <legend class="st5-legend"><span class="st5-number">Q5</span> รู้สึกว่าไม่สามารถจัดการกับความเครียดหรือภาระงานที่มีอยู่ได้?</legend>
+            <div class="likert">
+              <label class="likert-option">
+                <input class="likert-input" type="radio" name="st5q5" id="st5q5v0" value="0" required>
+                <span class="likert-chip"><span class="likert-value">0</span> ไม่เลย</span>
+              </label>
+              <label class="likert-option">
+                <input class="likert-input" type="radio" name="st5q5" id="st5q5v1" value="1" required>
+                <span class="likert-chip"><span class="likert-value">1</span> บางครั้ง</span>
+              </label>
+              <label class="likert-option">
+                <input class="likert-input" type="radio" name="st5q5" id="st5q5v2" value="2" required>
+                <span class="likert-chip"><span class="likert-value">2</span> บ่อยครั้ง</span>
+              </label>
+              <label class="likert-option">
+                <input class="likert-input" type="radio" name="st5q5" id="st5q5v3" value="3" required>
+                <span class="likert-chip"><span class="likert-value">3</span> ตลอดเวลา</span>
+              </label>
+            </div>
+          </fieldset>
+          <p class="block-help block-note"><i class="fa-solid fa-circle-info" aria-hidden="true"></i> แบบสอบถามนี้ใช้เพื่อสะท้อนตนเอง ไม่ใช่การวินิจฉัยทางการแพทย์</p>
+        </fieldset>
+
+        <!-- Free text -->
+        <div class="form-group" id="worryGroup">
+          <label class="form-label" for="worryText">ระบายความรู้สึกหรือสิ่งที่กังวล</label>
+          <textarea class="form-input form-textarea" id="worryText" name="worryText" rows="4" placeholder="เขียนได้อิสระ"></textarea>
+          <p class="anon-notice" id="anonNotice">
+            <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+            ระบบจะลบชื่อ เบอร์โทร อีเมล และรหัสนักศึกษาออกอัตโนมัติ (Anonymization) ก่อนประมวลผล
+          </p>
+        </div>
+
+        <button class="btn btn-primary" type="submit" id="submitBtn">
+          <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
+          <span class="btn-label" id="btnLabel">ประมวลผลด้วย AI Analytics Engine</span>
+        </button>
+      </form>
+    </section>
+
+    <!-- ============ RIGHT COLUMN: DASHBOARD ============ -->
+    <section class="panel panel-dashboard" id="dashboardSection" aria-labelledby="dashboardTitle">
+      <h2 class="panel-title" id="dashboardTitle"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> แผงวิเคราะห์ผล</h2>
+
+      <!-- Loading overlay (hidden until processing) -->
+      <div class="loading-overlay" id="loadingOverlay" role="status" aria-live="polite" hidden>
+        <div class="spinner" id="loadingSpinner"></div>
+        <p class="loading-text" id="loadingStatus">กำลังประมวลผล...</p>
+      </div>
+
+      <!-- Empty state (shown before first run) -->
+      <div class="empty-state" id="emptyState">
+        <i class="fa-regular fa-compass empty-icon" aria-hidden="true"></i>
+        <p>กรอกแบบประเมินทางซ้าย แล้วกดประมวลผลเพื่อดูผลวิเคราะห์ กราฟ และตารางแนะนำของวันนี้</p>
+      </div>
+
+      <!-- Results (hidden until processed) -->
+      <div class="results" id="resultsPanel" aria-live="polite" hidden>
+
+        <!-- Crisis alert banner: shown when stress > 75% -->
+        <div class="crisis-banner" id="crisisBanner" role="alert" hidden>
+          <i class="fa-solid fa-heart-pulse crisis-icon" aria-hidden="true"></i>
+          <div class="crisis-body">
+            <p class="crisis-title">เราเป็นห่วงคุณ</p>
+            <p class="crisis-message" id="crisisMessage">ระดับความเครียดสูงกว่า 75% คุณไม่ต้องรับมือคนเดียว</p>
+            <p class="crisis-hotline">
+              <i class="fa-solid fa-phone" aria-hidden="true"></i>
+              สายด่วนสุขภาพจิต <a class="hotline-number" href="tel:1323">1323</a> (24 ชั่วโมง)
+              · เหตุฉุกเฉิน <a class="hotline-number" href="tel:1669">1669</a>
+            </p>
+          </div>
+        </div>
+
+        <!-- Metric cards -->
+        <div class="metric-grid" id="metricCards">
+          <article class="metric-card" id="stressCard">
+            <p class="metric-label"><i class="fa-solid fa-gauge-high" aria-hidden="true"></i> Stress Index</p>
+            <p class="metric-value" id="stressIndex">0%</p>
+            <div class="meter" role="presentation"><div class="meter-fill" id="stressMeter"></div></div>
+          </article>
+          <article class="metric-card" id="burnoutCard">
+            <p class="metric-label"><i class="fa-solid fa-fire-flame-simple" aria-hidden="true"></i> Burnout Risk</p>
+            <p class="metric-value" id="burnoutRisk">-</p>
+            <p class="metric-hint" id="burnoutHint">Low / Medium / High / Critical</p>
+          </article>
+          <article class="metric-card" id="sentimentCard">
+            <p class="metric-label"><i class="fa-regular fa-face-smile" aria-hidden="true"></i> NLP Sentiment</p>
+            <p class="metric-value" id="sentimentScore">0.00</p>
+            <p class="metric-hint" id="sentimentHint">ช่วง -1.0 ถึง +1.0</p>
+          </article>
+        </div>
+
+        <!-- Charts -->
+        <div class="chart-grid" id="chartsContainer">
+          <article class="chart-card" id="radarCard">
+            <h3 class="card-title">โปรไฟล์ความเครียด 5 มิติ</h3>
+            <div class="chart-wrap"><canvas id="radarChart"></canvas></div>
+          </article>
+          <article class="chart-card" id="trendCard">
+            <h3 class="card-title">เปรียบเทียบสถิติย้อนหลัง</h3>
+            <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+          </article>
+        </div>
+
+        <!-- Adaptive schedule -->
+        <article class="schedule-card" id="scheduleCard">
+          <h3 class="card-title"><i class="fa-regular fa-clock" aria-hidden="true"></i> ตารางอ่านหนังสือและพักผ่อนแบบปรับตามสภาวะ (Pomodoro)</h3>
+          <p class="schedule-goal" id="scheduleGoal"></p>
+          <div class="table-wrap">
+            <table class="schedule-table" id="scheduleTable">
+              <thead>
+                <tr>
+                  <th scope="col">เวลา</th>
+                  <th scope="col">กิจกรรม</th>
+                  <th scope="col">ระยะเวลา</th>
+                </tr>
+              </thead>
+              <tbody id="scheduleBody"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <!-- Advice -->
+        <article class="advice-card" id="adviceBox">
+          <h3 class="card-title"><i class="fa-solid fa-hand-holding-heart" aria-hidden="true"></i> AI Clinical Advice</h3>
+          <div class="advice-content" id="adviceContent"></div>
+          <p class="disclaimer" id="adviceDisclaimer">คำแนะนำนี้สร้างจากกฎการคำนวณจำลองเพื่อการสะท้อนตนเอง ไม่ใช่การวินิจฉัยหรือการรักษาทางการแพทย์</p>
+        </article>
+
+        <!-- Export -->
+        <div class="export-actions" id="exportActions">
+          <button class="btn btn-secondary" type="button" id="exportBtn">
+            <i class="fa-solid fa-file-arrow-down" aria-hidden="true"></i>
+            Export JSON Report
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="site-footer" id="siteFooter">
+    <div class="container footer-inner">
+      <p>UniMind Pro · โปรเจกต์รายวิชา Artificial Intelligence in Modern Life</p>
+      <p class="footer-support"><i class="fa-solid fa-phone" aria-hidden="true"></i> สายด่วนสุขภาพจิต <a class="hotline-number" href="tel:1323">1323</a> ตลอด 24 ชั่วโมง</p>
+    </div>
+  </footer>
+
+</body>
+</html>
