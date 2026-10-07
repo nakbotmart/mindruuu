@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="UniMind Dashboard: ระบบวิเคราะห์สภาวะจิตใจและวางแผนตารางเรียนสำหรับนักศึกษา">
+  <title>UniMind Dashboard</title>
+
+  <!-- Google Fonts: Prompt -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- External stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Chart.js (CDN) must load before app.js; both use defer so order is kept -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <!-- External application script -->
+  <script src="app.js" defer></script>
+</head>
+
+<body>
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="site-header" id="siteHeader">
+    <div class="container header-inner">
+      <a class="logo" href="#" aria-label="UniMind Dashboard">
+        <svg class="logo-mark" viewBox="0 0 32 32" width="36" height="36" aria-hidden="true">
+          <circle cx="16" cy="16" r="15" class="logo-mark-bg"/>
+          <path class="logo-mark-leaf" d="M9 21c0-6 4-10 14-10 0 8-4 12-10 12-1.5 0-2.6-.4-4-2z"/>
+          <path class="logo-mark-vein" d="M10 22c3-3 6-6 10-8" fill="none"/>
+        </svg>
+        <span class="logo-text">UniMind Dashboard</span>
+      </a>
+      <p class="site-tagline">ระบบวิเคราะห์สภาวะจิตใจและวางแผนตารางเรียนสำหรับนักศึกษา</p>
+    </div>
+  </header>
+
+  <main class="container main-content">
+
+    <!-- ===================== SECTION 1: FORM ===================== -->
+    <section class="section section-form" id="formSection" aria-labelledby="formTitle">
+      <h2 class="section-title" id="formTitle">แบบฟอร์มประเมินความเครียด</h2>
+
+      <form class="assessment-form card" id="assessmentForm" novalidate>
+
+        <div class="form-group" id="nicknameGroup">
+          <label class="form-label" for="nickname">ชื่อเล่นหรือนามแฝง <span class="form-optional">(ไม่บังคับ)</span></label>
+          <input class="form-input" type="text" id="nickname" name="nickname" maxlength="30" autocomplete="off">
+        </div>
+
+        <fieldset class="form-group form-fieldset" id="moodGroup">
+          <legend class="form-label">อารมณ์วันนี้</legend>
+          <div class="mood-options">
+            <label class="mood-option">
+              <input class="mood-input" type="radio" name="mood" value="5">
+              <span class="mood-chip">😄 สดใส</span>
+            </label>
+            <label class="mood-option">
+              <input class="mood-input" type="radio" name="mood" value="4" checked>
+              <span class="mood-chip">🙂 ปกติ</span>
+            </label>
+            <label class="mood-option">
+              <input class="mood-input" type="radio" name="mood" value="3">
+              <span class="mood-chip">😮‍💨 เหนื่อยล้า</span>
+            </label>
+            <label class="mood-option">
+              <input class="mood-input" type="radio" name="mood" value="2">
+              <span class="mood-chip">😣 เครียดมาก</span>
+            </label>
+            <label class="mood-option">
+              <input class="mood-input" type="radio" name="mood" value="1">
+              <span class="mood-chip">😞 ท้อแท้</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="form-row">
+          <div class="form-group" id="taskGroup">
+            <label class="form-label" for="taskCount">จำนวนวิชาที่จะสอบ / งานค้าง</label>
+            <input class="form-input" type="number" id="taskCount" name="taskCount" min="0" max="20" value="3" inputmode="numeric">
+          </div>
+          <div class="form-group" id="sleepGroup">
+            <label class="form-label" for="sleepHours">ชั่วโมงการนอนเมื่อคืน</label>
+            <input class="form-input" type="number" id="sleepHours" name="sleepHours" min="0" max="24" step="0.5" value="6" inputmode="decimal">
+          </div>
+        </div>
+
+        <div class="form-group" id="worryGroup">
+          <label class="form-label" for="worryText">ความกังวลหรือสิ่งที่อยากระบาย</label>
+          <textarea class="form-input form-textarea" id="worryText" name="worryText" rows="4"
+            placeholder="เขียนได้อิสระ ระบบจะลบข้อมูลระบุตัวตนก่อนประมวลผล"></textarea>
+          <p class="form-help">ข้อมูลระบุตัวตน เช่น อีเมล เบอร์โทร รหัสนักศึกษา และชื่อ จะถูกลบอัตโนมัติ</p>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit" id="submitBtn">
+            <span class="spinner" id="loadingSpinner" hidden></span>
+            <span class="btn-label" id="btnLabel">ประมวลผลด้วย AI</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ===================== SECTION 2: DASHBOARD (hidden until processed) ===================== -->
+    <section class="section section-dashboard" id="dashboard" aria-labelledby="dashboardTitle" aria-live="polite" hidden>
+      <h2 class="section-title" id="dashboardTitle">ผลการวิเคราะห์</h2>
+
+      <!-- Emergency banner: JS un-hides it when risk is high -->
+      <div class="banner banner-emergency" id="emergencyBanner" role="alert" hidden>
+        <p class="banner-title">เราเป็นห่วงคุณ</p>
+        <p class="banner-message" id="emergencyMessage"></p>
+        <p class="banner-hotline">สายด่วนสุขภาพจิต <a class="hotline-number" href="tel:1323">1323</a> (ตลอด 24 ชั่วโมง)</p>
+      </div>
+
+      <!-- Score cards -->
+      <div class="score-grid" id="scoreCards">
+        <article class="card score-card" id="stressCard">
+          <h3 class="score-label">ระดับความเครียด</h3>
+          <p class="score-value" id="stressScore">0%</p>
+          <div class="meter" role="presentation"><div class="meter-fill" id="stressMeter"></div></div>
+        </article>
+        <article class="card score-card" id="burnoutCard">
+          <h3 class="score-label">ความเสี่ยง Academic Burnout</h3>
+          <p class="score-value" id="burnoutLevel">-</p>
+          <p class="score-hint" id="burnoutHint"></p>
+        </article>
+      </div>
+
+      <!-- Chart + Advice -->
+      <div class="insight-grid" id="insightGrid">
+        <article class="card chart-card" id="chartCard">
+          <h3 class="card-title">สัดส่วน Stress vs Balance</h3>
+          <div class="chart-wrap">
+            <canvas id="stressChart"></canvas>
+          </div>
+        </article>
+
+        <article class="card advice-card" id="adviceBox">
+          <h3 class="card-title">คำแนะนำสำหรับวันนี้</h3>
+          <div class="advice-content" id="adviceContent"></div>
+          <details class="anon-details" id="anonDetails">
+            <summary>ข้อความที่ถูกลบข้อมูลระบุตัวตนแล้ว</summary>
+            <p class="anon-text" id="anonText"></p>
+            <p class="anon-count" id="anonCount"></p>
+          </details>
+        </article>
+      </div>
+
+      <!-- Study-Life schedule -->
+      <article class="card schedule-card" id="scheduleCard">
+        <h3 class="card-title">ตารางอ่านหนังสือและพักผ่อน (Pomodoro)</h3>
+        <p class="schedule-goal" id="scheduleGoal"></p>
+        <div class="table-wrap">
+          <table class="schedule-table" id="scheduleTable">
+            <thead>
+              <tr>
+                <th scope="col">เวลา</th>
+                <th scope="col">กิจกรรม</th>
+                <th scope="col">ระยะเวลา</th>
+              </tr>
+            </thead>
+            <tbody id="scheduleBody"></tbody>
+          </table>
+        </div>
+      </article>
+
+      <!-- Always-visible support contacts -->
+      <aside class="banner banner-support" id="supportContacts" aria-labelledby="supportTitle">
+        <h3 class="banner-title" id="supportTitle">ช่องทางขอความช่วยเหลือ</h3>
+        <ul class="support-list">
+          <li class="support-item">สายด่วนสุขภาพจิต กรมสุขภาพจิต: <a class="hotline-number" href="tel:1323">1323</a> (24 ชั่วโมง)</li>
+          <li class="support-item">เหตุฉุกเฉิน: <a class="hotline-number" href="tel:1669">1669</a></li>
+          <li class="support-item" id="universityContact">ศูนย์ให้คำปรึกษาของมหาวิทยาลัย: ใส่เบอร์โทร / อีเมล / เวลาทำการ ที่นี่</li>
+        </ul>
+        <p class="disclaimer">ผลลัพธ์นี้เป็นการคำนวณจำลองเพื่อการสะท้อนตนเอง ไม่ใช่การวินิจฉัยทางการแพทย์</p>
+      </aside>
+    </section>
+
+  </main>
+
+  <footer class="site-footer" id="siteFooter">
+    <div class="container">
+      <p>UniMind Dashboard · โปรเจกต์รายวิชา Artificial Intelligence in Modern Life</p>
+    </div>
+  </footer>
+
+</body>
+</html>
